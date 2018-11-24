@@ -52,9 +52,6 @@ class Problem(csp.CSP):
             if line[0] == "A":
                 for Association in line[1:]:
                     Associations.append(tuple(Association.split(",")))
-        print(WeeklyClasses)
-        print(TimeSlots)
-        print(Rooms)
         # Create elements for the problem
         for WeeklyClass in WeeklyClasses:
             WeeklyClass = ",".join(WeeklyClass)
@@ -72,16 +69,18 @@ class Problem(csp.CSP):
                 if otherWeeklyClass != WeeklyClass:
                     neighbors[WeeklyClass].append(otherWeeklyClass)
         # Create constraints
-        print(neighbors)
         super().__init__(variables, domains, neighbors, Constraint(Associations).verify)
 
-    def dump_solution(self, fh):
-        pass
-        # Place here your code to write solution to opened file object fh
+    def dump_solution(self, fh, result):
+        output = ""
+        for WeeklyClass, Assignment in result.items():
+            output = (output + WeeklyClass + " " + ",".join(Assignment[0]) + " " +
+                ",".join(Assignment[1]) + "\n")
+        output = output[:-1]
+        fh.write(output)
+        return
         
 def solve(input_file, output_file):
     p = Problem(input_file)
     result = csp.backtracking_search(p)
-    print(result)
-    # Place here your code that calls function csp.backtracking_search(self, ...)
-    p.dump_solution(output_file)
+    p.dump_solution(output_file, result)
