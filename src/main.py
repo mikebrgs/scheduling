@@ -1,6 +1,7 @@
 import sys
 
 sys.path.insert(0, '/Users/mikebrgs/CurrentWork/tecnico/iasd/proj2/ext/aima-python/')
+#sys.path.insert(0, '/Users/loure/Dropbox/Lourenço/Faculdade/5A1S/IASD/SchoolSchedule')
 import csp
 
 class Constraint(object):
@@ -10,6 +11,7 @@ class Constraint(object):
             if not Association[1] in self.associations.keys():
                 self.associations[Association[1]] = set()
             self.associations[Association[1]].add(Association[0])
+        print("const: ", self.associations)
     
     def verify(self, A, a, B, b):
         if a[0][0] == b[0][0] and a[0][1] == b[0][1] and a[1] == b[1]:
@@ -68,6 +70,8 @@ class Problem(csp.CSP):
                 otherWeeklyClass = ",".join(otherWeeklyClass)
                 if otherWeeklyClass != WeeklyClass:
                     neighbors[WeeklyClass].append(otherWeeklyClass)
+        
+        print("W: ",WeeklyClasses,"\n", "T: ",TimeSlots,"\n", "R: ", Rooms,"\n", "S: ",StudentClasses,"\n", "A: ", Associations)
         # Create constraints
         super().__init__(variables, domains, neighbors, Constraint(Associations).verify)
 
