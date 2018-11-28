@@ -1,6 +1,7 @@
 import sys
 
 sys.path.insert(0, '/Users/mikebrgs/CurrentWork/tecnico/iasd/proj2/ext/aima-python/')
+#sys.path.insert(0, '/Users/loure/Dropbox/Lourenço/Faculdade/5A1S/IASD/SchoolSchedule')
 import csp
 
 def getdaytime(element):
@@ -31,6 +32,7 @@ class Analytics(object):
             if not Association[1] in self.associations.keys():
                 self.associations[Association[1]] = set()
             self.associations[Association[1]].add(Association[0])
+        print("const: ", self.associations)
     
     def verify(self, A, a, B, b):
         # Check if it's at the same time in the same classroom
