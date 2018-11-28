@@ -32,7 +32,6 @@ class Analytics(object):
             if not Association[1] in self.associations.keys():
                 self.associations[Association[1]] = set()
             self.associations[Association[1]].add(Association[0])
-        print("const: ", self.associations)
     
     def verify(self, A, a, B, b):
         # Check if it's at the same time in the same classroom
