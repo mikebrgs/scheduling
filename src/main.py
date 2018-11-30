@@ -1,7 +1,7 @@
 import sys
 
 sys.path.insert(0, '/Users/mikebrgs/CurrentWork/tecnico/iasd/proj2/ext/aima-python/')
-#sys.path.insert(0, '/Users/loure/Dropbox/Lourenço/Faculdade/5A1S/IASD/SchoolSchedule')
+#sys.path.insert(0, '/Users/loure/Dropbox/Lourenço/Faculdade/5A1S/IASD/SchoolSchedule/')
 import csp
 
 def getdaytime(element):
@@ -119,12 +119,14 @@ class Problem(csp.CSP):
         return True
 
     def dump_solution(self, fh, result):
-        output = ""
-        for WeeklyClass, Assignment in result.items():
-            output = (output + WeeklyClass + " " + ",".join(Assignment[0]) + " " +
-                ",".join(Assignment[1]) + "\n")
-        # output = output[:-1]
-        fh.write(output)
+        if result == "None":
+            fh.write("None")
+        else:
+            output = ""
+            for WeeklyClass, Assignment in result.items():
+                output = (output + WeeklyClass + " " + ",".join(Assignment[0]) + " " + Assignment[1] + "\n")
+            # output = output[:-1]
+            fh.write(output)
         return
 
     # Checks if the domain is large enough
@@ -157,8 +159,11 @@ def solve(input_file, output_file):
     domain_state = True
     result = set()
     while(not p.conditions()):
+        if p.SlotPointer == len(p.TimeSlots):
+            p.dump_solution(output_file,"None")
+            return
         domain_state = p.iterate_domain()
-    while(domain_state or len(result)==0):
+    while(len(result)==0):
         result = csp.backtracking_search(p,
                 select_unassigned_variable = csp.mrv,
                 order_domain_values = csp.lcv,
