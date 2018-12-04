@@ -1,0 +1,9 @@
+1.
+vars: weekly classes from every course
+domains: every possible combination of room and time slot
+constraints: room, one class at a time, teoricas no mesmo dia
+
+2. 
+MRV: reduces branching, less backtracks. (time complexity of DFS)
+LCV: flexibility, tries to keep the domain as broad as possible, in order to find the first solution earlier
+FC vs MAC: all variables are neighbors to each other, therefore FC does a substantial propagation of constraints. MAC is more complex and does a similar job. In case of sparser graphs the difference would be noticeable.
