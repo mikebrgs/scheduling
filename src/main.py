@@ -32,7 +32,7 @@ class Analytics(object):
             if not Association[1] in self.associations.keys():
                 self.associations[Association[1]] = set()
             self.associations[Association[1]].add(Association[0])
-    
+
     def verify(self, A, a, B, b):
         # Check if it's at the same time in the same classroom
         if (getday(a) == getday(b) and
@@ -118,12 +118,15 @@ class Problem(csp.CSP):
         super().__init__(self.variables, self.domains, self.neighbors, Analytics(self.Associations).verify)
         return True
 
+    # Write the solution to an external file
     def dump_solution(self, fh, result):
         output = ""
-        for WeeklyClass, Assignment in result.items():
-            output = (output + WeeklyClass + " " + ",".join(Assignment[0]) + " " +
-                ",".join(Assignment[1]) + "\n")
-        # output = output[:-1]
+        if len(result) == 0:
+            output = "None"
+        else:
+            for WeeklyClass, Assignment in result.items():
+                output = (output + WeeklyClass + " " + ",".join(Assignment[0]) + " " +
+                    Assignment[1] + "\n")
         fh.write(output)
         return
 
@@ -156,12 +159,25 @@ def solve(input_file, output_file):
     p = Problem(input_file)
     domain_state = True
     result = set()
-    while(not p.conditions()):
-        domain_state = p.iterate_domain()
-    while(domain_state or len(result)==0):
+    while(p.iterate_domain()):
+        if not p.conditions():
+            continue
         result = csp.backtracking_search(p,
-                select_unassigned_variable = csp.mrv,
-                order_domain_values = csp.lcv,
-                inference = csp.forward_checking)
-        domain_state = p.iterate_domain()
+            select_unassigned_variable = csp.mrv,
+            order_domain_values = csp.lcv,
+            inference = csp.forward_checking)
+        if result:
+            break
+            # result = csp.backtracking_search(p,
+            #     select_unassigned_variable = csp.mrv,
+            #     order_domain_values = csp.lcv,
+            #     inference = csp.forward_checking)
+    # while(not p.conditions()):
+    #     domain_state = p.iterate_domain()
+    # while(domain_state or len(result)==0):
+    #     result = csp.backtracking_search(p,
+    #             select_unassigned_variable = csp.mrv,
+    #             order_domain_values = csp.lcv,
+    #             inference = csp.forward_checking)
+    #     domain_state = p.iterate_domain()
     p.dump_solution(output_file,result)
