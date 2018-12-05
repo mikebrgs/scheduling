@@ -1,9 +1,37 @@
 1.
-vars: weekly classes from every course
-domains: every possible combination of room and time slot
-constraints: room, one class at a time, teoricas no mesmo dia
+Given that:
+	- T is a set of timeslots
+	- R is a set of rooms
+	- S is a set of student classes 
+	- W is a set of weekly classes
+	- A is a set of associations
+	- X is the set of variables
+	- D is the set of domains for all variables
+	- Di is the set of possible values (domain) for Xi
 
-2. 
-MRV: reduces branching, less backtracks. (time complexity of DFS)
+The variables in this problem are all the weekly classes (tuples) from every unique course in the associations set to which needs to be assigned a time slot and a room.
+	X := W, e.g. X = {(IASD,T,1),(IASD,T,2),(SAut,T,1), ...}
+
+For each variable, the domain is the set of all the possible combinations of room and time slot in the sets T and R.
+	for all Xi in X
+	Di = T x R, e.g. Di = {(Mon,8,EA1),(Mon,8,EA2),(Tue,8,EA1),...}
+
+For every variable A, B and the respective assignement a, b there are 3 constraints: 
+	- Each room can only hold one class at a time
+		C1: (day(a), time(a), room(a)) != (day(b), time(b), room(b))
+
+	- Each student class can only attend one class at a time
+		C2: (course(A),time(a)) != (course(B),time(b))
+
+	- No two weekly classes of the same course and type may occur on the same weekday
+		C3: (course(A), type(A), day(a)) != (course(B), type(B), day(b))
+
+The resulting constraint graph is a complete graph, with all nodes connecting to all other nodes by constraint C1 and connecting all nodes from the same course by C2 and also connecting all nodes of same course and same type by C3.
+
+2. When performing backtrack search we used the Minimum Remaining Values and Least Constraining Value heuristics and Forward Checking inference.
+
+When selecting the next variable to assign we use the MRV heuristic to choose the variable whose domain is the smallest. This way the branching factor is reduced and so is the time complexity. 
+For problem P3, the execution time with MRV (and with the other heuristics) is 0.014354 seconds and without MRV (with the other heuristics) is 0.016080 seconds.
+
 LCV: flexibility, tries to keep the domain as broad as possible, in order to find the first solution earlier
 FC vs MAC: all variables are neighbors to each other, therefore FC does a substantial propagation of constraints. MAC is more complex and does a similar job. In case of sparser graphs the difference would be noticeable.
