@@ -1,31 +1,38 @@
 import sys
-
-sys.path.insert(0, '/Users/mikebrgs/CurrentWork/tecnico/iasd/proj2/ext/aima-python/')
-#sys.path.insert(0, '/Users/loure/Dropbox/Lourenço/Faculdade/5A1S/IASD/SchoolSchedule')
+import random
 import csp
 
+# Get the day and time from domain's tuple
 def getdaytime(element):
     return element[0]
 
+# Get the day from the domain's tuple
 def getday(element):
     return element[0][0]
 
+# Get the time from domain's tuple
 def gettime(element):
     return element[0][1]
 
+# Get the room from domain's tuple
 def getroom(element):
     return element[1]
 
+# Get the course from variable's name
 def getcourse(variable):
     return variable[0]
 
+# Get the course type from the variable's name
 def getctype(variable):
     return variable[1]
 
+# Get the course's class number from the variable's name
 def getctnumber(variable):
     return variable[2]
 
+# Class that contains the method to check CSP constraints
 class Analytics(object):
+    # Initialization of constraints
     def __init__(self, Associations):
         self.associations = dict()
         for Association in Associations:
@@ -33,6 +40,7 @@ class Analytics(object):
                 self.associations[Association[1]] = set()
             self.associations[Association[1]].add(Association[0])
 
+    # Verify if this two variable assignments are valid
     def verify(self, A, a, B, b):
         # Check if it's at the same time in the same classroom
         if (getday(a) == getday(b) and
@@ -52,18 +60,19 @@ class Analytics(object):
             return False
         return True
 
+# Problem class
 class Problem(csp.CSP):
     def __init__(self, fh):
         self.variables = list()
         self.domains = dict()
         self.neighbors = dict()
-        # Read every line of the file
         self.WeeklyClasses = list()
         self.TimeSlots = list()
         self.SlotPointer = 0
         self.Rooms = list()
         self.StudentClasses = list()
         self.Associations = list()
+        # Read every line of the file
         for line in fh:
             line = line.replace("\n","").split(" ")
             if line[0] == "W":
@@ -90,10 +99,6 @@ class Problem(csp.CSP):
             self.variables.append(WeeklyClass)
             self.domains[WeeklyClass] = list()
             self.neighbors[WeeklyClass] = list()
-            # Creates domains
-            # for TimeSlot in self.TimeSlots:
-            #     for Room in self.Rooms:
-            #         self.domains[WeeklyClass].append((TimeSlot, Room))
             # Creates neighbors
             for otherWeeklyClass in self.WeeklyClasses:
                 otherWeeklyClass = ",".join(otherWeeklyClass)
@@ -103,9 +108,10 @@ class Problem(csp.CSP):
 
     # Increase the domain to the next minimum value
     def iterate_domain(self):
-        # Start at
+        # Check if the domain is big enough
         if self.SlotPointer >= len(self.TimeSlots):
             return False
+        # Increase domain by one time unit
         CurrentPointer = self.SlotPointer
         while (CurrentPointer < len(self.TimeSlots) and
             self.TimeSlots[CurrentPointer][1] == self.TimeSlots[self.SlotPointer][1]):
@@ -113,6 +119,7 @@ class Problem(csp.CSP):
                 for Room in self.Rooms:
                     self.domains[WeeklyClass].append((self.TimeSlots[CurrentPointer], Room))
             CurrentPointer += 1
+        # Save pointer for next domain iteration
         self.SlotPointer = CurrentPointer
         # Initialize problem
         super().__init__(self.variables, self.domains, self.neighbors, Analytics(self.Associations).verify)
@@ -133,6 +140,7 @@ class Problem(csp.CSP):
     # Checks if the domain is large enough
     def conditions(self):
         associations = dict()
+        # Create dictionary of associations
         for Association in self.Associations:
             if not Association[0] in associations.keys():
                 associations[Association[0]] = set()
@@ -154,11 +162,12 @@ class Problem(csp.CSP):
             return False
         return True
 
-        
+# Solve function
 def solve(input_file, output_file):
+    # Initialize
     p = Problem(input_file)
-    domain_state = True
     result = set()
+    # Increase domain and search for solution while it's not valid
     while(p.iterate_domain()):
         if not p.conditions():
             continue
@@ -168,16 +177,5 @@ def solve(input_file, output_file):
             inference = csp.forward_checking)
         if result:
             break
-            # result = csp.backtracking_search(p,
-            #     select_unassigned_variable = csp.mrv,
-            #     order_domain_values = csp.lcv,
-            #     inference = csp.forward_checking)
-    # while(not p.conditions()):
-    #     domain_state = p.iterate_domain()
-    # while(domain_state or len(result)==0):
-    #     result = csp.backtracking_search(p,
-    #             select_unassigned_variable = csp.mrv,
-    #             order_domain_values = csp.lcv,
-    #             inference = csp.forward_checking)
-    #     domain_state = p.iterate_domain()
+    # Save solution
     p.dump_solution(output_file,result)
