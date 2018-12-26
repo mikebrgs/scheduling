@@ -28,10 +28,19 @@ For every variable A, B and the respective assignement a, b there are 3 constrai
 
 The resulting constraint graph is a complete graph, with all nodes connecting to all other nodes by constraint C1 and connecting all nodes from the same course by C2 and also connecting all nodes of same course and same type by C3.
 
-2. When performing backtrack search we used the Minimum Remaining Values and Least Constraining Value heuristics and Forward Checking inference.
+2. 
+We performed several tests in order to evaluate the performance of the CSP problem solver under different heuristics. The performance was measured by timing the execution in datasets of different complexity.
 
-When selecting the next variable to assign we use the MRV heuristic to choose the variable whose domain is the smallest. This way the branching factor is reduced and so is the time complexity. 
-For problem P3, the execution time with MRV (and with the other heuristics) is 0.014354 seconds and without MRV (with the other heuristics) is 0.016080 seconds.
+When selecting an inference we had 3 choices: no inference, Forward Checking (FC) and Maintaining Arc Consistency (MAC). We found that propagating constraints gave better results than not applying. Given the high density of our constraint graph, when applying FC, an assignement would be propagated through all the graph. For MAC, propagating the assignement recursively through the graph was too slow and not worth the effort.
 
-LCV: flexibility, tries to keep the domain as broad as possible, in order to find the first solution earlier
-FC vs MAC: all variables are neighbors to each other, therefore FC does a substantial propagation of constraints. MAC is more complex and does a similar job. In case of sparser graphs the difference would be noticeable.
+When selecting the next variable to assign we use the Minimum Remaining Values (MRV) heuristic to choose the variable whose domain is the smallest. This way branching is reduced and therefore so is the time complexity of the search problem.
+
+When assigning a value we use the Least Constraining Value (LCV) which tries to keep the neighbor's domains as broad as possible, in order to find a solution faster.
+
+We found that for well-structured datasets (in which the timeslots are similar for different days - e.g. Mon,8 Mon,9 Tue,8 Tue,9 Wed,8 ...), the quickest way to solve was to sort the domains by ascending timeslot (Mon,8 Tue,8 Wed,8 Mon,9 Tue,9 ...) and then use only Forward Checking inference. This would result in assigning the first timeslots sequentially to classes of the same course and thus quickly making a fairly good assignement. For a complex dataset, it took about 9 seconds to solve using only FC and about 18 seconds using FC+MRV+LCV.
+
+This heuristic of ordering the domains does not generalize well for datasets in which the domains are poorly structured (e.g. Mon,8 Mon,9 Tue,15 Tue,16 Wed,22 Wed,23 Thu,200 Thu,201 ...) in which our dataset could not be solved in less than 2 minutes using only FC. In this case applying FC+MRV+LCV resulted in an execution time of 19.4 seconds, roughly the same time as in a "well-behaved" dataset.
+
+Because of the robustness properties in different types of datasets, we decided to perform backtrack search combining FC+MRV+LCV.
+
+Also note that, for the simple datasets, like the ones in the public tests, applying MRV and LCV heuristics was slower simply because of the computational effort of comparing the variables and their possible values. The Forward Checking inference was still worth applying.
